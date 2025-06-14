@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: videoclub-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: videoclub
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: appsecret
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+  app:
+    image: a27810/videoclub:1.0
+    container_name: videoclub-app
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      ConnectionString: "Server=db;Database=videoclub;Uid=appuser;Pwd=appsecret;"
+    ports:
+      - "27810:27810"
+    volumes:
+      - ./data:/app/data
+
+volumes:
+  db_data:
