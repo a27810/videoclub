@@ -1,3 +1,6 @@
+AA2 - DESARROLLO WEB EN ENTORNO SERVIDOR
+__________________________________________
+
 Este proyecto es un videoclub clásico hecho como aplicación de consola visual usando .NET y Terminal.Gui. El objetivo es gestionar fácilmente las películas, los usuarios y los alquileres desde una terminal, con una experiencia sencilla y accesible.
 
 ¿Qué puede hacer la aplicación?
