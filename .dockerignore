@@ -1,0 +1,19 @@
+# Ignorar artefactos de compilación
+bin/
+obj/
+
+# Solo necesitamos el csproj en build stage
+!*.csproj
+
+# IDE / usuarios
+.vs/
+*.user
+*.suo
+
+# Git
+.git/
+.gitignore
+
+# Logs y datos (los montamos desde host)
+data/
+logs/

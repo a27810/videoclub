@@ -9,7 +9,7 @@
       "Videoclub/1.0.0": {
         "dependencies": {
           "MySql.Data": "9.3.0",
-          "Terminal.Gui": "1.18.1"
+          "Terminal.Gui": "1.19.0"
         },
         "runtime": {
           "Videoclub.dll": {}
@@ -334,7 +334,7 @@
       },
       "System.Threading.Tasks.Extensions/4.5.4": {},
       "System.ValueTuple/4.5.0": {},
-      "Terminal.Gui/1.18.1": {
+      "Terminal.Gui/1.19.0": {
         "dependencies": {
           "NStack.Core": "1.1.1",
           "System.Management": "9.0.4"
@@ -611,12 +611,12 @@
       "path": "system.valuetuple/4.5.0",
       "hashPath": "system.valuetuple.4.5.0.nupkg.sha512"
     },
-    "Terminal.Gui/1.18.1": {
+    "Terminal.Gui/1.19.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-x2W591/Y/290I0tQbhjJKY6ivO6w5fQmufBETmZM4drnS+aLhQUFVQM/10jUPP8MSgoPyLXEf/ICGeg7v9gBTg==",
-      "path": "terminal.gui/1.18.1",
-      "hashPath": "terminal.gui.1.18.1.nupkg.sha512"
+      "sha512": "sha512-Pgdlgout2KsBX+tO4t4mmg3YAL0vhT8falV4T77ohuQECel0q9agGKDWEfB0Cs1EnsGlrs7kCxocwphguKOVww==",
+      "path": "terminal.gui/1.19.0",
+      "hashPath": "terminal.gui.1.19.0.nupkg.sha512"
     },
     "ZstdSharp.Port/0.8.5": {
       "type": "package",
