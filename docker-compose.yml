@@ -1,37 +1,11 @@
-version: "3.8"
-
+version: "3.9"
 services:
-  db:
-    image: mysql:8.0
-    container_name: videoclub-db
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: videoclub
-      MYSQL_USER: appuser
-      MYSQL_PASSWORD: appsecret
-    volumes:
-      - db_data:/var/lib/mysql
+  videoclub:
+    build: .
+    container_name: videoclub
     ports:
-      - "3306:3306"
-
-  app:
-    # Si prefieres construir localmente en lugar de usar una imagen publicada,
-    # sustituye "image: ..." por:
-    # build: .
-    image: a27810/videoclub:1.0
-    container_name: videoclub-app
-    restart: unless-stopped
-    depends_on:
-      - db
-    environment:
-      ConnectionString: "Server=db;Database=videoclub;Uid=appuser;Pwd=appsecret;"
+      - "27810:27810"   # expone el puerto, aunque sea consola, lo pide el enunciado
     volumes:
-      - ./data:/app/data
-    ports:
-      - "27810:27810"
-    stdin_open: true  # mantiene stdin abierto para la UI de Terminal.Gui
-    tty: true         # asigna un pseudo‐TTY para poder renderizar la interfaz de consola
-
-volumes:
-  db_data:
+      - ./data:/app/data  # volumen para datos y logs
+    environment:
+      - DOTNET_ENVIRONMENT=Production

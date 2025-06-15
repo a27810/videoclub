@@ -1,0 +1,34 @@
+[
+  {
+    "Id": 1,
+    "Titulo": "El Padrino",
+    "Genero": "Crimen",
+    "AnioEstreno": 1972,
+    "DuracionMinutos": 175,
+    "Disponible": true
+  },
+  {
+    "Id": 2,
+    "Titulo": "Casablanca",
+    "Genero": "Romance",
+    "AnioEstreno": 1942,
+    "DuracionMinutos": 102,
+    "Disponible": false
+  },
+  {
+    "Id": 3,
+    "Titulo": "bella y bestia",
+    "Genero": "dibujos",
+    "AnioEstreno": 1995,
+    "DuracionMinutos": 120,
+    "Disponible": true
+  },
+  {
+    "Id": 4,
+    "Titulo": "matrix",
+    "Genero": "CCFF",
+    "AnioEstreno": 1999,
+    "DuracionMinutos": 190,
+    "Disponible": false
+  }
+]

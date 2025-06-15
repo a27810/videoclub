@@ -1,0 +1,47 @@
+[
+  {
+    "Id": 1,
+    "Nombre": "Admin",
+    "Email": "admin@admin.com",
+    "Password": "admin",
+    "Role": "admin",
+    "FechaAlta": "2025-06-15T00:00:00+02:00",
+    "EsPremium": false
+  },
+  {
+    "Id": 2,
+    "Nombre": "Juan P\u00E9rez",
+    "Email": "juan@ej.com",
+    "Password": "juan123",
+    "Role": "user",
+    "FechaAlta": "2025-03-15T00:00:00+01:00",
+    "EsPremium": false
+  },
+  {
+    "Id": 3,
+    "Nombre": "Ana Garc\u00EDa",
+    "Email": "ana@ej.com",
+    "Password": "ana123",
+    "Role": "user",
+    "FechaAlta": "2024-06-15T00:00:00+02:00",
+    "EsPremium": true
+  },
+  {
+    "Id": 4,
+    "Nombre": "gus",
+    "Email": "gus",
+    "Password": "gus",
+    "Role": "user",
+    "FechaAlta": "2025-06-15T00:00:00+02:00",
+    "EsPremium": false
+  },
+  {
+    "Id": 5,
+    "Nombre": "paula",
+    "Email": "paula",
+    "Password": "paula",
+    "Role": "user",
+    "FechaAlta": "2025-06-15T00:00:00+02:00",
+    "EsPremium": false
+  }
+]

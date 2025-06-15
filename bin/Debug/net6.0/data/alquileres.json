@@ -1,0 +1,18 @@
+[
+  {
+    "Id": 1,
+    "PeliculaId": 3,
+    "ClienteId": 5,
+    "FechaAlquiler": "2025-06-15T22:53:49.5384224+02:00",
+    "FechaDevolucion": "2025-06-15T22:54:03.3442302+02:00",
+    "Devuelto": true
+  },
+  {
+    "Id": 2,
+    "PeliculaId": 4,
+    "ClienteId": 4,
+    "FechaAlquiler": "2025-06-15T23:13:41.3429853+02:00",
+    "FechaDevolucion": null,
+    "Devuelto": false
+  }
+]
