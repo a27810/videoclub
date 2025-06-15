@@ -3,11 +3,11 @@ FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
 
 # Copia el csproj y restaura dependencias
-COPY Videoclub.csproj .
+COPY Videoclub.csproj ./
 RUN dotnet restore
 
 # Copia el resto del código y publica en Release
-COPY . .
+COPY . ./
 RUN dotnet publish -c Release -o /app/publish
 
 # 2) Runtime stage: la imagen final más ligera
@@ -15,7 +15,7 @@ FROM mcr.microsoft.com/dotnet/runtime:5.0 AS runtime
 WORKDIR /app
 
 # Copia sólo los artefactos publicados
-COPY --from=build /app/publish .
+COPY --from=build /app/publish ./
 
 # Volumen para datos persistentes (JSON, logs…)
 VOLUME /app/data

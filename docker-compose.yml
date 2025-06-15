@@ -16,6 +16,9 @@ services:
       - "3306:3306"
 
   app:
+    # Si prefieres construir localmente en lugar de usar una imagen publicada,
+    # sustituye "image: ..." por:
+    # build: .
     image: a27810/videoclub:1.0
     container_name: videoclub-app
     restart: unless-stopped
@@ -23,10 +26,12 @@ services:
       - db
     environment:
       ConnectionString: "Server=db;Database=videoclub;Uid=appuser;Pwd=appsecret;"
-    ports:
-      - "27810:27810"
     volumes:
       - ./data:/app/data
+    ports:
+      - "27810:27810"
+    stdin_open: true  # mantiene stdin abierto para la UI de Terminal.Gui
+    tty: true         # asigna un pseudo‐TTY para poder renderizar la interfaz de consola
 
 volumes:
   db_data:

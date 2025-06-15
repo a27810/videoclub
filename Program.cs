@@ -1,4 +1,3 @@
-// Archivo: Program.cs
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,305 +8,196 @@ namespace Videoclub
 {
     class Program
     {
-        // --- Datos en memoria ---
-        static List<Pelicula> peliculas     = new List<Pelicula>();
-        static int siguienteIdPelicula       = 1;
+        static List<Pelicula> peliculas;
+        static int siguienteIdPelicula;
+        static List<Cliente> clientes;
+        static int siguienteIdCliente;
+        static List<Alquiler> alquileres;
+        static Cliente currentUser;
 
-        static List<Cliente> clientes       = new List<Cliente>();
-        static int siguienteIdCliente        = 1;
-
-        static void Main(string[] args)
+        static void Main()
         {
-            // Inicialización de ejemplo
-            peliculas = new List<Pelicula>
-            {
-                new Pelicula { Id = siguienteIdPelicula++, Titulo="El padrino",    Genero="Crimen",  AnioEstreno=1972, DuracionMinutos=175, Disponible=true  },
-                new Pelicula { Id = siguienteIdPelicula++, Titulo="Casablanca",    Genero="Romance", AnioEstreno=1942, DuracionMinutos=102, Disponible=false }
-            };
-            clientes = new List<Cliente>
-            {
-                new Cliente { Id = siguienteIdCliente++, Nombre="Juan Pérez",  Email="juan@ej.com", FechaAlta=DateTime.Today.AddMonths(-3), EsPremium=false },
-                new Cliente { Id = siguienteIdCliente++, Nombre="Ana García",  Email="ana@ej.com",  FechaAlta=DateTime.Today.AddYears(-1),  EsPremium=true  }
-            };
-
             Application.Init();
-            MostrarMenuPrincipal();
+            var top = Application.Top;
+
+            CargarDatosIniciales();
+            EjecutarLogin(top);
+            MostrarMenuPrincipal(top);
             Application.Run();
             Application.Shutdown();
         }
 
-        static void MostrarMenuPrincipal()
+        static void CargarDatosIniciales()
         {
-            var top = Application.Top;
+            peliculas = new List<Pelicula> {
+                new Pelicula { Id = 1, Titulo="El Padrino", Genero="Crimen", AnioEstreno=1972, DuracionMinutos=175, Disponible=true },
+                new Pelicula { Id = 2, Titulo="Casablanca", Genero="Romance", AnioEstreno=1942, DuracionMinutos=102, Disponible=false }
+            };
+            siguienteIdPelicula = peliculas.Max(p => p.Id) + 1;
 
-            // Barra de menú principal
-            var menu = new MenuBar(new[]
-            {
-                new MenuBarItem("_Películas", new[]
-                {
-                    new MenuItem("_Listado...", "", ListadoPeliculas),
-                    new MenuItem("_Nueva...",   "", NuevaPelicula),
-                    new MenuItem("_Buscar...",  "", BuscarPeliculas)
-                }),
-                new MenuBarItem("_Géneros", new[]
-                {
-                    new MenuItem("_Listado...", "", ListadoGeneros),
-                    new MenuItem("_Nuevo...",   "", NuevoGenero)
-                }),
-                new MenuBarItem("_Usuarios", new[]
-                {
-                    new MenuItem("_Listado...", "", ListadoUsuarios),
-                    new MenuItem("_Nuevo...",   "", NuevoUsuario),
-                    new MenuItem("_Buscar...",  "", BuscarUsuarios)
-                }),
-                new MenuBarItem("_Alquileres", new[]
-                {
-                    new MenuItem("_Listado...", "", ListadoAlquileres),
-                    new MenuItem("_Nuevo...",   "", NuevoAlquiler)
-                }),
-                new MenuBarItem("_Salir", new[]
-                {
-                    new MenuItem("_Salir", "", () => Application.RequestStop())
+            clientes = new List<Cliente> {
+                new Cliente { Id=1, Nombre="Admin", Email="admin@admin.com", Password="admin", Role="admin", FechaAlta=DateTime.Today, EsPremium=false },
+                new Cliente { Id=2, Nombre="Juan Pérez", Email="juan@ej.com", Password="juan123", Role="user", FechaAlta=DateTime.Today.AddMonths(-3), EsPremium=false },
+                new Cliente { Id=3, Nombre="Ana García", Email="ana@ej.com", Password="ana123", Role="user", FechaAlta=DateTime.Today.AddYears(-1), EsPremium=true  }
+            };
+            siguienteIdCliente = clientes.Max(c => c.Id) + 1;
+
+            alquileres = new List<Alquiler>();
+        }
+
+        static void EjecutarLogin(Toplevel top)
+        {
+            var dlg = new Dialog("🔑 Iniciar sesión", 50, 14) { Modal = true };
+            var lblEmail    = new Label(2, 2, "Email:");
+            var txtEmail    = new TextField(10, 2, 30, "");
+            var lblPass     = new Label(2, 4, "Contraseña:");
+            var txtPass     = new TextField(12, 4, 28, "") { Secret = true };
+            var btnEntrar   = new Button("Entrar")    { X =  2, Y = 10 };
+            var btnRegistro = new Button("Registro")  { X = 12, Y = 10 };
+            var btnSalir    = new Button("Salir App") { X = 26, Y = 10 };
+
+            btnEntrar.Clicked += () => {
+                var user = clientes.FirstOrDefault(c =>
+                    c.Email.Equals(txtEmail.Text.ToString().Trim(), StringComparison.OrdinalIgnoreCase)
+                    && c.Password == txtPass.Text.ToString());
+                if (user == null) {
+                    MessageBox.ErrorQuery("Error", "Email o contraseña incorrectos.", "OK");
+                    return;
+                }
+                currentUser = user;
+                Application.RequestStop();
+            };
+
+            btnRegistro.Clicked += () => {
+                top.Remove(dlg);
+                MostrarRegistro(top);
+            };
+
+            btnSalir.Clicked += () => Environment.Exit(0);
+
+            dlg.Add(lblEmail, txtEmail, lblPass, txtPass, btnEntrar, btnRegistro, btnSalir);
+            top.Add(dlg);
+            Application.Run(dlg);
+        }
+
+        static void MostrarRegistro(Toplevel top)
+        {
+            var dlg = new Dialog("🆕 Nuevo Usuario", 50, 14) { Modal = true };
+            var lblNombre = new Label(2, 2, "Nombre:");
+            var txtNombre = new TextField(10, 2, 30, "");
+            var lblEmail  = new Label(2, 4, "Email:");
+            var txtEmail  = new TextField(10, 4, 30, "");
+            var lblPass   = new Label(2, 6, "Contraseña:");
+            var txtPass   = new TextField(12, 6, 28, "") { Secret = true };
+            var btnGuardar= new Button("Guardar")  { X =  4, Y = 10 };
+            var btnCancel = new Button("Cancelar") { X = 20, Y = 10 };
+
+            btnGuardar.Clicked += () => {
+                var nombre = txtNombre.Text.ToString().Trim();
+                var email  = txtEmail.Text.ToString().Trim();
+                var pass   = txtPass.Text.ToString();
+                if (string.IsNullOrEmpty(nombre)|| string.IsNullOrEmpty(email) || string.IsNullOrEmpty(pass)) {
+                    MessageBox.ErrorQuery("Error", "Rellena todos los campos.", "OK");
+                    return;
+                }
+                if (clientes.Any(c => c.Email.Equals(email, StringComparison.OrdinalIgnoreCase))) {
+                    MessageBox.ErrorQuery("Error", "Email ya existe.", "OK");
+                    return;
+                }
+                var nuevo = new Cliente {
+                    Id = siguienteIdCliente++,
+                    Nombre = nombre,
+                    Email = email,
+                    Password = pass,
+                    Role = "user",
+                    FechaAlta = DateTime.Today,
+                    EsPremium = false
+                };
+                clientes.Add(nuevo);
+                MessageBox.Query("Listo", "Usuario creado.", "OK");
+                top.Remove(dlg);
+                EjecutarLogin(top);
+            };
+
+            btnCancel.Clicked += () => {
+                top.Remove(dlg);
+                EjecutarLogin(top);
+            };
+
+            dlg.Add(lblNombre, txtNombre, lblEmail, txtEmail, lblPass, txtPass, btnGuardar, btnCancel);
+            top.Add(dlg);
+            Application.Run(dlg);
+        }
+
+        static void MostrarMenuPrincipal(Toplevel top)
+        {
+            var menuItems = new List<MenuBarItem>();
+
+            var pelItems = new List<MenuItem> {
+                new MenuItem("Listado", "Ver todas las películas", ListadoPeliculas),
+                new MenuItem("Buscar",  "Buscar por título/género", BuscarPeliculas)
+            };
+            if (currentUser.Role == "admin") {
+                pelItems.Add(null);
+                pelItems.Add(new MenuItem("Nuevo",   "Añadir película",     NuevaPelicula));
+                pelItems.Add(new MenuItem("Editar",  "Modificar película",  EditarPelicula));
+                pelItems.Add(new MenuItem("Eliminar","Borrar película",     BorrarPelicula));
+            }
+            menuItems.Add(new MenuBarItem("Películas", pelItems.ToArray()));
+
+            if (currentUser.Role == "admin") {
+                var usrItems = new List<MenuItem> {
+                    new MenuItem("Listado",  "Ver todos los usuarios", ListadoUsuarios),
+                    new MenuItem("Eliminar", "Eliminar usuario",       BorrarUsuario)
+                };
+                menuItems.Add(new MenuBarItem("Usuarios", usrItems.ToArray()));
+            }
+
+            var alqItems = new List<MenuItem>();
+            if (currentUser.Role == "admin") {
+                alqItems.Add(new MenuItem("Nuevo",    "Registrar alquiler",    NuevoAlquiler));
+                alqItems.Add(new MenuItem("Devolver", "Registrar devolución",  DevolverAlquiler));
+            } else {
+                alqItems.Add(new MenuItem("Mis Alq.", "Ver mis alquileres",    ListadoAlquileresUsuario));
+            }
+            menuItems.Add(new MenuBarItem("Alquiler", alqItems.ToArray()));
+
+            var perfilItems = new List<MenuItem> {
+                new MenuItem("Datos",  "Ver/Editar mi perfil", MostrarPerfil),
+                new MenuItem("Logout", "Cerrar sesión", () => {
+                    Application.RequestStop();
+                    Application.Top.RemoveAll();
+                    EjecutarLogin(Application.Top);
+                    MostrarMenuPrincipal(Application.Top);
+                    Application.Run();
                 })
-            });
+            };
+            menuItems.Add(new MenuBarItem("Mi perfil", perfilItems.ToArray()));
+
+            menuItems.Add(new MenuBarItem("Salir", new[] {
+                new MenuItem("Salir App", "Terminar la aplicación", () => Environment.Exit(0))
+            }));
+
+            var menu = new MenuBar(menuItems.ToArray());
             top.Add(menu);
-
-            // Ventana de fondo (vacía)
-            var win = new Window("🎬 Videoclub")
-            {
-                X = 0, Y = 1,
-                Width = Dim.Fill(),
-                Height = Dim.Fill()
-            };
-            top.Add(win);
+            top.Add(new Window("🎬 Videoclub") {
+                X = 0, Y = 1, Width = Dim.Fill(), Height = Dim.Fill()
+            });
         }
 
-        // === PELÍCULAS ===
-        static void ListadoPeliculas()
-        {
-            var d = new Dialog("Listado de Películas", 60, 20);
-            var items = peliculas.Select(p => $"{p.Id}. {p.Titulo}").ToList();
-            var lv = new ListView(items) { X=0, Y=0, Width=Dim.Fill(), Height=Dim.Fill()-2 };
-            d.Add(lv);
+        // ——— Stubs a implementar ———
+        static void ListadoPeliculas()    { /* … */ }
+        static void BuscarPeliculas()     { /* … */ }
+        static void NuevaPelicula()       { /* … */ }
+        static void EditarPelicula()      { /* … */ }
+        static void BorrarPelicula()      { /* … */ }
 
-            var btnVer = new Button("Ver")      { X=0,                    Y=Pos.Bottom(lv) };
-            var btnDel = new Button("Eliminar") { X=Pos.Right(btnVer)+2,  Y=Pos.Bottom(lv) };
-            var btnOk  = new Button("Cerrar")   { X=Pos.Right(btnDel)+2,  Y=Pos.Bottom(lv) };
+        static void MostrarPerfil()            { /* … */ }
+        static void ListadoAlquileresUsuario() { /* … */ }
+        static void NuevoAlquiler()            { /* … */ }
+        static void DevolverAlquiler()         { /* … */ }
 
-            btnVer.Clicked += () =>
-            {
-                var idx = lv.SelectedItem;
-                if (idx >= 0)
-                {
-                    var p = peliculas[idx];
-                    MessageBox.Query("Detalle",
-                        $"ID: {p.Id}\nTítulo: {p.Titulo}\nGénero: {p.Genero}\nAño: {p.AnioEstreno}\n" +
-                        $"Duración: {p.DuracionMinutos} min\nDisponible: {(p.Disponible?"Sí":"No")}",
-                        "OK");
-                }
-            };
-            btnDel.Clicked += () =>
-            {
-                var idx = lv.SelectedItem;
-                if (idx >= 0 && MessageBox.Query("Eliminar", $"¿Borrar “{peliculas[idx].Titulo}”?", "Sí","No")==0)
-                {
-                    peliculas.RemoveAt(idx);
-                    lv.SetSource(peliculas.Select(p => $"{p.Id}. {p.Titulo}").ToList());
-                }
-            };
-            btnOk.Clicked += () => Application.RequestStop();
-
-            d.Add(btnVer, btnDel, btnOk);
-            Application.Run(d);
-        }
-
-        static void NuevaPelicula()
-        {
-            var d = new Dialog("Nueva Película", 60, 15);
-            var lbl1 = new Label(1,1,"Título:");
-            var txt1 = new TextField(10,1,40,"");
-            var lbl2 = new Label(1,3,"Género:");
-            var txt2 = new TextField(10,3,20,"");
-            var lbl3 = new Label(1,5,"Año:");
-            var txt3 = new TextField(10,5,6,"");
-            var lbl4 = new Label(1,7,"Duración:");
-            var txt4 = new TextField(10,7,6,"");
-            var chk  = new CheckBox(1,9,"Disponible",true);
-            d.Add(lbl1,txt1,lbl2,txt2,lbl3,txt3,lbl4,txt4,chk);
-
-            var btnSave = new Button("Guardar")   { X=10, Y=11 };
-            var btnCancel = new Button("Cancelar"){ X=30, Y=11 };
-
-            btnSave.Clicked += () =>
-            {
-                if (string.IsNullOrWhiteSpace(txt1.Text.ToString()))
-                {
-                    MessageBox.ErrorQuery("Error","El título no puede estar vacío.","OK");
-                    return;
-                }
-                peliculas.Add(new Pelicula
-                {
-                    Id              = siguienteIdPelicula++,
-                    Titulo          = txt1.Text.ToString(),
-                    Genero          = txt2.Text.ToString(),
-                    AnioEstreno     = int.TryParse(txt3.Text.ToString(), out var a)? a : 0,
-                    DuracionMinutos = int.TryParse(txt4.Text.ToString(), out var m)? m : 0,
-                    Disponible      = chk.Checked
-                });
-                Application.RequestStop();
-            };
-            btnCancel.Clicked += () => Application.RequestStop();
-
-            d.Add(btnSave, btnCancel);
-            Application.Run(d);
-        }
-
-        static void BuscarPeliculas()
-        {
-            var d = new Dialog("Buscar Películas",50,10);
-            var lbl = new Label(1,1,"Texto a buscar:");
-            var txt = new TextField(15,1,25,"");
-            var btnB = new Button("Buscar") { X=5,  Y=4 };
-            var btnC = new Button("Cerrar") { X=20, Y=4 };
-            d.Add(lbl,txt,btnB,btnC);
-
-            btnB.Clicked += () =>
-            {
-                var term = txt.Text.ToString().ToLower();
-                var res = peliculas
-                    .Where(p=>p.Titulo.ToLower().Contains(term))
-                    .Select(p=>$"{p.Id}. {p.Titulo}")
-                    .ToList();
-                Application.RequestStop();
-
-                var rd = new Dialog($"Resultados “{term}”",50,10);
-                var lv2 = new ListView(res){ X=0, Y=0, Width=Dim.Fill(), Height=Dim.Fill()-2 };
-                var ok = new Button("OK"){ X=0, Y=Pos.Bottom(lv2) };
-                ok.Clicked += () => Application.RequestStop();
-                rd.Add(lv2, ok);
-                Application.Run(rd);
-            };
-            btnC.Clicked += () => Application.RequestStop();
-            Application.Run(d);
-        }
-
-        // === GÉNEROS (stubs) ===
-        static void ListadoGeneros()    => MessageBox.Query("Géneros","En desarrollo.","OK");
-        static void NuevoGenero()      => MessageBox.Query("Géneros","En desarrollo.","OK");
-
-        // === USUARIOS ===
-        static void ListadoUsuarios()
-        {
-            var d = new Dialog("Listado de Usuarios", 60, 20);
-            var items = clientes.Select(c => $"{c.Id}. {c.Nombre}").ToList();
-            var lv = new ListView(items) { X=0, Y=0, Width=Dim.Fill(), Height=Dim.Fill()-2 };
-            d.Add(lv);
-
-            var btnVer = new Button("Ver")      { X=0,                    Y=Pos.Bottom(lv) };
-            var btnDel = new Button("Eliminar") { X=Pos.Right(btnVer)+2,  Y=Pos.Bottom(lv) };
-            var btnOk  = new Button("Cerrar")   { X=Pos.Right(btnDel)+2,  Y=Pos.Bottom(lv) };
-
-            btnVer.Clicked += () =>
-            {
-                var idx = lv.SelectedItem;
-                if (idx >= 0)
-                {
-                    var c = clientes[idx];
-                    MessageBox.Query("Detalle",
-                        $"ID: {c.Id}\nNombre: {c.Nombre}\nEmail: {c.Email}\n" +
-                        $"Alta: {c.FechaAlta:d}\nPremium: {(c.EsPremium?"Sí":"No")}",
-                        "OK");
-                }
-            };
-            btnDel.Clicked += () =>
-            {
-                var idx = lv.SelectedItem;
-                if (idx >= 0 && MessageBox.Query("Eliminar",$"¿Borrar “{clientes[idx].Nombre}”?","Sí","No")==0)
-                {
-                    clientes.RemoveAt(idx);
-                    lv.SetSource(clientes.Select(c => $"{c.Id}. {c.Nombre}").ToList());
-                }
-            };
-            btnOk.Clicked += () => Application.RequestStop();
-
-            d.Add(btnVer, btnDel, btnOk);
-            Application.Run(d);
-        }
-
-        static void NuevoUsuario()
-        {
-            var d = new Dialog("Nuevo Usuario", 60, 18);
-            var lbl1 = new Label(1,1,"Nombre:");
-            var txt1 = new TextField(10,1,40,"");
-            var lbl2 = new Label(1,3,"Email:");
-            var txt2 = new TextField(10,3,40,"");
-            var lbl3 = new Label(1,5,"Fecha Alta (YYYY-MM-DD):");
-            var txt3 = new TextField(25,5,15, DateTime.Today.ToString("yyyy-MM-dd"));
-            var chk  = new CheckBox(1,7,"Premium", false);
-            d.Add(lbl1,txt1,lbl2,txt2,lbl3,txt3,chk);
-
-            var btnSave   = new Button("Guardar")   { X=10, Y=10 };
-            var btnCancel = new Button("Cancelar")  { X=30, Y=10 };
-            btnSave.Clicked += () =>
-            {
-                if (string.IsNullOrWhiteSpace(txt1.Text.ToString()) ||
-                    string.IsNullOrWhiteSpace(txt2.Text.ToString()))
-                {
-                    MessageBox.ErrorQuery("Error","Nombre y Email no pueden estar vacíos.","OK");
-                    return;
-                }
-                if (!DateTime.TryParse(txt3.Text.ToString(), out var fAlta))
-                {
-                    MessageBox.ErrorQuery("Error","Fecha inválida.","OK");
-                    return;
-                }
-                clientes.Add(new Cliente
-                {
-                    Id         = siguienteIdCliente++,
-                    Nombre     = txt1.Text.ToString(),
-                    Email      = txt2.Text.ToString(),
-                    FechaAlta  = fAlta,
-                    EsPremium  = chk.Checked
-                });
-                Application.RequestStop();
-            };
-            btnCancel.Clicked += () => Application.RequestStop();
-
-            d.Add(btnSave, btnCancel);
-            Application.Run(d);
-        }
-
-        static void BuscarUsuarios()
-        {
-            var d = new Dialog("Buscar Usuarios",50,10);
-            var lbl = new Label(1,1,"Texto a buscar:");
-            var txt = new TextField(15,1,25,"");
-            var btnB = new Button("Buscar") { X=5,  Y=4 };
-            var btnC = new Button("Cerrar") { X=20, Y=4 };
-            d.Add(lbl,txt,btnB,btnC);
-
-            btnB.Clicked += () =>
-            {
-                var term = txt.Text.ToString().ToLower();
-                var res = clientes
-                    .Where(c=>c.Nombre.ToLower().Contains(term) || c.Email.ToLower().Contains(term))
-                    .Select(c=>$"{c.Id}. {c.Nombre}")
-                    .ToList();
-                Application.RequestStop();
-
-                var rd = new Dialog($"Resultados “{term}”",50,10);
-                var lv2 = new ListView(res){ X=0, Y=0, Width=Dim.Fill(), Height=Dim.Fill()-2 };
-                var ok = new Button("OK"){ X=0, Y=Pos.Bottom(lv2) };
-                ok.Clicked += () => Application.RequestStop();
-                rd.Add(lv2, ok);
-                Application.Run(rd);
-            };
-            btnC.Clicked += () => Application.RequestStop();
-            Application.Run(d);
-        }
-
-        // === ALQUILERES (stubs) ===
-        static void ListadoAlquileres() => MessageBox.Query("Alquileres","En desarrollo.","OK");
-        static void NuevoAlquiler()    => MessageBox.Query("Alquileres","En desarrollo.","OK");
+        static void ListadoUsuarios() { /* … */ }
+        static void BorrarUsuario()   { /* … */ }
     }
 }

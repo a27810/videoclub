@@ -1,0 +1,179 @@
+﻿/* using System;
+using System.Collections.Generic;
+using System.Linq;
+using Terminal.Gui;
+using Videoclub.Models;
+
+namespace Videoclub
+{
+    class Program
+    {
+        // Almacenamiento en memoria de Películas
+        static List<Pelicula> peliculas = new List<Pelicula>();
+        static int siguienteId = 1;
+
+        static void Main(string[] args)
+        {
+            Application.Init();
+            VistaPrincipal();
+            Application.Run();
+            Application.Shutdown();
+        }
+
+        static void VistaPrincipal()
+        {
+            var top = Application.Top;
+
+            var menu = new MenuBar(new MenuBarItem[]
+            {
+                new MenuBarItem("_Películas", new MenuItem[]
+                {
+                    new MenuItem("_Listado...", "", ListadoPeliculas),
+                    new MenuItem("_Nueva...", "", NuevaPelicula),
+                    new MenuItem("_Buscar...", "", BuscarPeliculas)
+                }),
+                new MenuBarItem("_Salir", new MenuItem[]
+                {
+                    new MenuItem("E_xit", "", () => { Application.RequestStop(); })
+                })
+            });
+
+            var win = new Window("🎬 Videoclub")
+            {
+                X = 0,
+                Y = 1,
+                Width = Dim.Fill(),
+                Height = Dim.Fill() - 1
+            };
+            top.Add(menu, win);
+        }
+
+        static void ListadoPeliculas()
+        {
+            var d = new Dialog("Listado de Películas", 60, 20);
+
+            var listView = new ListView(peliculas.Select(p => $"{p.Id}. {p.Titulo}").ToList())
+            {
+                X = 0,
+                Y = 0,
+                Width = Dim.Fill(),
+                Height = Dim.Fill() - 2
+            };
+            d.Add(listView);
+
+            // Botones
+            var btnVer = new Button("Ver") { X = 0, Y = Pos.Bottom(listView) };
+            var btnEliminar = new Button("Eliminar") { X = Pos.Right(btnVer) + 2, Y = Pos.Bottom(listView) };
+            var btnCerrar = new Button("Cerrar") { X = Pos.Right(btnEliminar) + 2, Y = Pos.Bottom(listView) };
+
+            btnVer.Clicked += () =>
+            {
+                if (listView.SelectedItem >= 0)
+                    MostrarDetalle(peliculas[listView.SelectedItem]);
+            };
+            btnEliminar.Clicked += () =>
+            {
+                if (listView.SelectedItem >= 0)
+                {
+                    var p = peliculas[listView.SelectedItem];
+                    var ok = MessageBox.Query("Eliminar", $"¿Borrar “{p.Titulo}”?", "Sí", "No");
+                    if (ok == 0)
+                    {
+                        peliculas.RemoveAt(listView.SelectedItem);
+                        listView.Source = peliculas.Select(x => $"{x.Id}. {x.Titulo}").ToList();
+                    }
+                }
+            };
+            btnCerrar.Clicked += () => Application.RequestStop();
+
+            d.Add(btnVer, btnEliminar, btnCerrar);
+            Application.Run(d);
+        }
+
+        static void MostrarDetalle(Pelicula p)
+        {
+            var msg =
+                $"ID: {p.Id}\nTítulo: {p.Titulo}\nGénero: {p.Genero}\nAño: {p.AnioEstreno}\n" +
+                $"Duración: {p.DuracionMinutos} min\nDisponible: {(p.Disponible ? "Sí" : "No")}";
+            MessageBox.Query("Detalle", msg, "OK");
+        }
+
+        static void NuevaPelicula()
+        {
+            var d = new Dialog("Nueva Película", 60, 15);
+
+            var lblTitulo = new Label(1, 1, "Título:");
+            var txtTitulo = new TextField(10, 1, 40, "");
+            var lblGenero = new Label(1, 3, "Género:");
+            var txtGenero = new TextField(10, 3, 20, "");
+            var lblAnio = new Label(1, 5, "Año:");
+            var txtAnio = new TextField(10, 5, 6, "");
+            var lblDur = new Label(1, 7, "Duración:");
+            var txtDur = new TextField(10, 7, 6, "");
+            var chkDisp = new CheckBox(1, 9, "Disponible", true);
+
+            d.Add(lblTitulo, txtTitulo, lblGenero, txtGenero, lblAnio, txtAnio, lblDur, txtDur, chkDisp);
+
+            var btnOk = new Button("Guardar") { X = 10, Y = 11 };
+            var btnCancel = new Button("Cancelar") { X = 30, Y = 11 };
+
+            btnOk.Clicked += () =>
+            {
+                if (string.IsNullOrWhiteSpace(txtTitulo.Text.ToString()))
+                {
+                    MessageBox.ErrorQuery("Error", "El título no puede estar vacío.", "OK");
+                    return;
+                }
+                // Crear y añadir
+                peliculas.Add(new Pelicula
+                {
+                    Id = siguienteId++,
+                    Titulo = txtTitulo.Text.ToString(),
+                    Genero = txtGenero.Text.ToString(),
+                    AnioEstreno = int.TryParse(txtAnio.Text.ToString(), out var a) ? a : 0,
+                    DuracionMinutos = int.TryParse(txtDur.Text.ToString(), out var m) ? m : 0,
+                    Disponible = chkDisp.Checked,
+                });
+                Application.RequestStop();
+            };
+            btnCancel.Clicked += () => Application.RequestStop();
+
+            d.Add(btnOk, btnCancel);
+            Application.Run(d);
+        }
+
+        static void BuscarPeliculas()
+        {
+            var d = new Dialog("Buscar Películas", 50, 10);
+            var lbl = new Label(1, 1, "Texto a buscar:");
+            var txt = new TextField(15, 1, 25, "");
+            d.Add(lbl, txt);
+
+            var btnSearch = new Button("Buscar") { X = 5, Y = 4 };
+            var btnClose = new Button("Cerrar") { X = 20, Y = 4 };
+            d.Add(btnSearch, btnClose);
+
+            btnSearch.Clicked += () =>
+            {
+                var term = txt.Text.ToString().ToLower();
+                var results = peliculas
+                    .Where(p => p.Titulo.ToLower().Contains(term))
+                    .Select(p => $"{p.Id}. {p.Titulo}")
+                    .ToList();
+                Application.RequestStop(); // cierra dialogo actual
+
+                // Muestra resultados
+                var rd = new Dialog($"Resultados para “{term}”", 50, 10);
+                var lv = new ListView(results) { X = 0, Y = 0, Width = Dim.Fill(), Height = Dim.Fill() - 2 };
+                var btnOk = new Button("OK") { X = 0, Y = Pos.Bottom(lv) };
+                btnOk.Clicked += () => Application.RequestStop();
+                rd.Add(lv, btnOk);
+                Application.Run(rd);
+            };
+
+            btnClose.Clicked += () => Application.RequestStop();
+            Application.Run(d);
+        }
+    }
+}
+ */
